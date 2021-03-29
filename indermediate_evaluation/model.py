@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class Model(nn.Module):
     def __init__(self, dataset):
         super(Model, self).__init__()
@@ -29,5 +29,5 @@ class Model(nn.Module):
         return logits, state
 
     def init_state(self, sequence_length):
-        return (torch.zeros(self.num_layers, sequence_length, self.lstm_size),
-                torch.zeros(self.num_layers, sequence_length, self.lstm_size))
+        return (torch.zeros(self.num_layers, sequence_length, self.lstm_size).to(device),
+                torch.zeros(self.num_layers, sequence_length, self.lstm_size).to(device))

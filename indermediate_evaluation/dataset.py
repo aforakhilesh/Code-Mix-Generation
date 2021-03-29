@@ -1,6 +1,7 @@
 import torch
 import pandas as pd
 from collections import Counter
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(
@@ -17,7 +18,7 @@ class Dataset(torch.utils.data.Dataset):
         self.words_indexes = [self.word_to_index[w] for w in self.words]
 
     def load_words(self):
-        train_df = pd.read_csv('data/CodeMixcorpora/temp.csv')
+        train_df = pd.read_csv('data/CodeMixcorpora/test.csv')
         text = train_df['Sentence'].str.cat(sep=' ')
         return text.split(' ')
 
@@ -30,6 +31,6 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         return (
-            torch.tensor(self.words_indexes[index:index+self.args.sequence_length]),
-            torch.tensor(self.words_indexes[index+1:index+self.args.sequence_length+1]),
+            torch.tensor(self.words_indexes[index:index+self.args.sequence_length]).to(device),
+            torch.tensor(self.words_indexes[index+1:index+self.args.sequence_length+1]).to(device),
         )

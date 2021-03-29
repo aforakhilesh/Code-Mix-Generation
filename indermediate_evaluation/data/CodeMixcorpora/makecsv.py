@@ -1,6 +1,6 @@
 import pandas as pd
-
-sents = pd.read_csv('temp.txt', header=None, delimiter='\n', error_bad_lines=False)
+import csv
+sents = pd.read_csv('test_clean.txt', header=None, delimiter='\n', error_bad_lines=False, quoting=csv.QUOTE_NONE)
 sents.columns = ["Sentence"]
 
-sents.to_csv('temp.csv', index=None)
+sents.to_csv('test.csv', index=None)
