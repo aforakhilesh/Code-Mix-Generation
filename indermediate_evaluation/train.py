@@ -26,11 +26,15 @@ def train(dataset, model, args):
             state_h, state_c = model.init_state(args.sequence_length)
 
             for batch, (x, y) in enumerate(dataloader):
-
+                
+                # print(x)
+                # print(y)    
                 optimizer.zero_grad()
 
                 y_pred, (state_h, state_c) = model(x, (state_h, state_c))
                 loss = criterion(y_pred.transpose(1, 2), y)
+                # print(y_pred)
+                # print(len(y_pred[0][0]))
 
                 state_h = state_h.detach()
                 state_c = state_c.detach()
@@ -40,25 +44,8 @@ def train(dataset, model, args):
 
                 print({ 'epoch': epoch, 'batch': batch, 'loss': loss.item() })
     except:
-        torch.save(model,"./test_15_256_epoch_model_gpu")
+        torch.save(model,"./test_15_512_epoch_model_gpu")
         
-
-def predict(dataset, model, text, next_words=10):
-    words = text.split(' ')
-    model.eval()
-
-    state_h, state_c = model.init_state(len(words))
-
-    for i in range(0, next_words):
-        x = torch.tensor([[dataset.word_to_index[w] for w in words[i:]]])
-        y_pred, (state_h, state_c) = model(x, (state_h, state_c))
-
-        last_word_logits = y_pred[0][-1]
-        p = torch.nn.functional.softmax(last_word_logits, dim=0).detach().cpu().numpy()
-        word_index = np.random.choice(len(last_word_logits), p=p)
-        words.append(dataset.index_to_word[word_index])
-
-    return words
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--max-epochs', type=int, default=15)
@@ -67,12 +54,12 @@ parser.add_argument('--sequence-length', type=int, default=4)
 args = parser.parse_args()
 
 dataset = Dataset(args)
-model = Model(dataset).to(device)
-# print(dataset.words)
-# exit()
+print("done")
+
+model = torch.load("./test_15_512_epoch_model_gpu")
 
 train(dataset, model, args)
 
-torch.save(model,"./test_15_256_epoch_model_gpu")
 
-print(predict(dataset, model, text='sachin tendulkar is a god'))
+torch.save(model,"./test_15_512_epoch_model_gpu")
+
