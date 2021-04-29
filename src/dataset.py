@@ -18,7 +18,7 @@ class Dataset(torch.utils.data.Dataset):
         self.words_indexes = [self.word_to_index[w] for w in self.words]
 
     def load_words(self):
-        train_df = pd.read_csv('data/CodeMixcorpora/test.csv')
+        train_df = pd.read_csv('Data/test_clean2.csv')
         text = train_df['Sentence'].str.cat(sep=' ')
         return text.split(' ')
 

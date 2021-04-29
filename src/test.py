@@ -7,6 +7,8 @@ from model import Model
 from dataset import Dataset
 import random
 import pandas as pd
+import re
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def predict(dataset, model, text, next_words):
@@ -24,6 +26,8 @@ def predict(dataset, model, text, next_words):
         word_index = np.random.choice(len(last_word_logits), p=p)
         # print(p[word_index])
         words.append(dataset.index_to_word[word_index])
+        if words[-1]=='@':
+            break
 
     return words
 
@@ -47,11 +51,28 @@ def perp(dataset, model, text):
         prob*=p[word_exp]
         words.append(dataset.index_to_word[word_exp])
 
-    perp = (1/prob)**1/(next_words)
+    perp = (1/prob)**(1/(next_words))
 
     return words,prob,perp
 
+def cmi(sentence):
 
+    n_e=0
+    n_h=0
+    u=0
+
+    for word in sentence:
+        # print(word)
+        if bool(re.match("[a-z]+", word)):
+            n_e+=1
+        elif word.isnumeric():
+            print(word)
+            u+=1
+        elif bool(re.match(("[\u0900-\u097F]+"), word)):
+            n_h+=1
+            
+    print(n_e,n_h,u,len(sentence))
+    print(100*(1-(max(n_e,n_h)/(n_h+n_e))))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--max-epochs', type=int, default=10)
@@ -61,20 +82,23 @@ args = parser.parse_args()
 
 dataset = Dataset(args)
 
-model = torch.load("./models/test_15_512_epoch_model_gpu")
+model = torch.load("./models/colab_train_model_512_10_epoch")
 text=input("enter Prompt : ")
 words = text.split(' ')
 num_words = int(input("enter the number of words to be predicted : "))
 sentence=""
-predictions=predict(dataset, model, text,num_words)
+predictions=predict(dataset, model, "# "+text,num_words)
 for w in predictions:
     sentence=sentence+" "+w
 
-print("the generated text is : ",sentence)
+print("the generated text is : ",sentence[2:-1])
 
-words, prob, perpl =perp(dataset,model,text)
-print("perplexity of prompt is : ",perpl)
-print("probability of prompt is : ",prob)
+predictions.append(" @")
+cmi(predictions[1:-1])
+
+words, prob, perpl =perp(dataset,model,sentence)
+print("perplexity is : ",perpl)
+print("probability is : ",prob)
 
 # validation=pd.read_csv('./data/CodeMixcorpora/test.csv')
 # validation['Sentence'][0]
