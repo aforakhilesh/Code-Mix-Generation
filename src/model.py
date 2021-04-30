@@ -6,7 +6,7 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.lstm_size = 128
         self.embedding_dim = 128
-        self.num_layers = 3
+        self.num_layers = 3 
 
         n_vocab = len(dataset.uniq_words)
         self.embedding = nn.Embedding(
